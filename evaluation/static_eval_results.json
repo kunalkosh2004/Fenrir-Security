@@ -2,69 +2,69 @@
   {
     "instruction": "Create a new Git branch and switch to it",
     "reference": "To create a new Git branch and switch to it:\n1. Use `git checkout -b <branch-name>` to create and switch in one command\n2. Or use `git branch <branch-name>` then `git checkout <branch-name>`\n3. Example: `git checkout -b feature-login`\n4. Verify with `git branch` to see current branch marked with *",
-    "base_response": "Create a git branch and switch to it",
-    "finetuned_response": "Git branch",
+    "base_response": "Create a new git branch and switch",
+    "finetuned_response": "Create a git branch",
     "metrics": {
-      "base_bleu": 0.0003734933519332356,
-      "finetuned_bleu": 6.255904175917033e-16,
-      "base_rouge_l": 0.25806451612903225,
-      "finetuned_rouge_l": 0.07142857142857142,
-      "base_word_overlap": 0.23529411764705882,
-      "finetuned_word_overlap": 0.058823529411764705
+      "base_bleu": 0.00014236123002125668,
+      "finetuned_bleu": 2.084992921200795e-08,
+      "base_rouge_l": 0.22950819672131148,
+      "finetuned_rouge_l": 0.13793103448275862,
+      "base_word_overlap": 0.20588235294117646,
+      "finetuned_word_overlap": 0.11764705882352941
     }
   },
   {
     "instruction": "Compress the folder reports into reports.tar.gz",
     "reference": "To compress the folder reports into reports.tar.gz:\n1. Use `tar -czf reports.tar.gz reports/`\n2. The -c flag creates archive, -z compresses with gzip, -f specifies filename\n3. Verify compression: `ls -lh reports.tar.gz`\n4. Alternative: `tar -czvf reports.tar.gz reports/` (with verbose output)",
-    "base_response": "Depends on the file structure",
-    "finetuned_response": "Takes a while",
+    "base_response": "How do you report bugs?",
+    "finetuned_response": "int : report",
     "metrics": {
-      "base_bleu": 2.531348497222494e-06,
-      "finetuned_bleu": 0,
+      "base_bleu": 0,
+      "finetuned_bleu": 3.0013513438186094e-09,
       "base_rouge_l": 0.03703703703703703,
-      "finetuned_rouge_l": 0.0,
-      "base_word_overlap": 0.02564102564102564,
-      "finetuned_word_overlap": 0.0
+      "finetuned_rouge_l": 0.039215686274509796,
+      "base_word_overlap": 0.0,
+      "finetuned_word_overlap": 0.02564102564102564
     }
   },
   {
     "instruction": "List all Python files in the current directory recursively",
     "reference": "To list all Python files recursively:\n1. Use `find . -name '*.py'` to find all .py files\n2. Use `find . -type f -name '*.py'` to ensure only files, not directories\n3. Alternative: `ls -la **/*.py` (if shell supports globstar)\n4. With details: `find . -name '*.py' -exec ls -l {} \\;`",
-    "base_response": "Pretend to be a programmer",
-    "finetuned_response": "If you can't see the problem, why would you ask the question?",
+    "base_response": "Python : a program that makes you go to the same place twice",
+    "finetuned_response": "Python :",
     "metrics": {
-      "base_bleu": 1.1433040381666348e-08,
-      "finetuned_bleu": 0.00024223999101567653,
-      "base_rouge_l": 0.03846153846153846,
-      "finetuned_rouge_l": 0.03333333333333333,
-      "base_word_overlap": 0.022727272727272728,
+      "base_bleu": 0.00013182366416876105,
+      "finetuned_bleu": 5.626192194292214e-19,
+      "base_rouge_l": 0.06779661016949153,
+      "finetuned_rouge_l": 0.04166666666666667,
+      "base_word_overlap": 0.06818181818181818,
       "finetuned_word_overlap": 0.045454545454545456
     }
   },
   {
     "instruction": "Set up a virtual environment and install requests",
     "reference": "To set up virtual environment and install requests:\n1. Create venv: `python -m venv myenv` or `python3 -m venv myenv`\n2. Activate: `source myenv/bin/activate` (Linux/Mac) or `myenv\\Scripts\\activate` (Windows)\n3. Install requests: `pip install requests`\n4. Verify installation: `pip show requests`\n5. Deactivate when done: `deactivate`",
-    "base_response": "Response : Not in the mood",
-    "finetuned_response": "Set up a virtual environment and install requests",
+    "base_response": "Response : No.",
+    "finetuned_response": "Hello, I would like to have your computer running on a server with the same IP as the computer you are on.",
     "metrics": {
-      "base_bleu": 1.0351888827971401e-06,
-      "finetuned_bleu": 0.00029022316819851543,
+      "base_bleu": 5.349102924461217e-09,
+      "finetuned_bleu": 0.0017175169160284485,
       "base_rouge_l": 0.0,
-      "finetuned_rouge_l": 0.24137931034482757,
+      "finetuned_rouge_l": 0.027777777777777776,
       "base_word_overlap": 0.02702702702702703,
-      "finetuned_word_overlap": 0.1891891891891892
+      "finetuned_word_overlap": 0.02702702702702703
     }
   },
   {
     "instruction": "Fetch only the first ten lines of a file named output.log",
     "reference": "To fetch the first ten lines of output.log:\n1. Use `head -10 output.log` or `head -n 10 output.log`\n2. Default head shows first 10 lines: `head output.log`\n3. Alternative with sed: `sed -n '1,10p' output.log`\n4. Check file exists first: `ls -la output.log`",
     "base_response": "Fetch only the first line of a file named output.log",
-    "finetuned_response": "Fetch only the first line of a file named output.log",
+    "finetuned_response": "Fetch only the first one line of a file named output.log",
     "metrics": {
       "base_bleu": 0.0005581328218201196,
-      "finetuned_bleu": 0.0005581328218201196,
+      "finetuned_bleu": 0.0008697830304493895,
       "base_rouge_l": 0.2622950819672131,
-      "finetuned_rouge_l": 0.2622950819672131,
+      "finetuned_rouge_l": 0.25806451612903225,
       "base_word_overlap": 0.1875,
       "finetuned_word_overlap": 0.1875
     }
@@ -72,29 +72,29 @@
   {
     "instruction": "Find and kill all processes containing 'python' in their name, but exclude the current shell session",
     "reference": "To find and kill Python processes safely:\n1. List processes: `ps aux | grep python | grep -v grep`\n2. Get PIDs: `pgrep -f python`\n3. Exclude current shell: `ps aux | grep python | grep -v grep | grep -v $$`\n4. Kill specific processes: `pkill -f 'python script.py'`\n5. Force kill if needed: `pkill -9 -f python`\n6. Always verify before killing: check process details with `ps -p <PID>`",
-    "base_response": "PipeJob : run in the background",
-    "finetuned_response": "It's not a problem, it's a solution.",
+    "base_response": "Not found",
+    "finetuned_response": "How do you stop the Python?",
     "metrics": {
-      "base_bleu": 1.6049416886208887e-08,
-      "finetuned_bleu": 0,
+      "base_bleu": 0,
+      "finetuned_bleu": 1.2952087799502693e-07,
       "base_rouge_l": 0.0,
-      "finetuned_rouge_l": 0.0,
-      "base_word_overlap": 0.02,
-      "finetuned_word_overlap": 0.0
+      "finetuned_rouge_l": 0.027777777777777776,
+      "base_word_overlap": 0.0,
+      "finetuned_word_overlap": 0.02
     }
   },
   {
     "instruction": "Recover uncommitted changes after accidentally running 'git reset --hard' in a repository with unstaged modifications",
     "reference": "To recover from accidental git reset --hard:\n1. Check reflog immediately: `git reflog`\n2. Find the commit before reset: look for HEAD@{1} or similar\n3. Reset to previous state: `git reset --hard HEAD@{1}`\n4. If files were untracked, they may be lost permanently\n5. Check git fsck for dangling commits: `git fsck --lost-found`\n6. For future: use `git stash` before risky operations\n7. Note: Unstaged changes are usually unrecoverable after hard reset",
-    "base_response": "Repository : hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard hard",
-    "finetuned_response": "No, we just removed a dependency on a dependency on a dependency on a dependency on a dependency on a dependency on a dependency on a dependency",
+    "base_response": "Relevant username",
+    "finetuned_response": "git reset... hard reset",
     "metrics": {
-      "base_bleu": 0.004789646525462792,
-      "finetuned_bleu": 0.0007801367363523516,
-      "base_rouge_l": 0.03529411764705882,
-      "finetuned_rouge_l": 0.0,
-      "base_word_overlap": 0.03278688524590164,
-      "finetuned_word_overlap": 0.01639344262295082
+      "base_bleu": 0,
+      "finetuned_bleu": 1.173060848637763e-09,
+      "base_rouge_l": 0.0,
+      "finetuned_rouge_l": 0.10126582278481014,
+      "base_word_overlap": 0.0,
+      "finetuned_word_overlap": 0.04918032786885246
     }
   }
 ]

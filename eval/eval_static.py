@@ -8,7 +8,6 @@ from nltk.translate.bleu_score import sentence_bleu
 from rouge_score import rouge_scorer
 import nltk
 
-# Download required NLTK data
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
@@ -18,7 +17,6 @@ class ModelEvaluator:
     def __init__(self, base_model_name: str, finetuned_model_path: str):
         self.base_model_name = base_model_name
         self.finetuned_model_path = finetuned_model_path
-        # Determine the best available device
         self.device = self._get_device()
         print(f"Using device: {self.device}")
         self.load_models()
@@ -36,28 +34,23 @@ class ModelEvaluator:
         """Load both base and fine-tuned models"""
         print("Loading models...")
         
-        # Load tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(self.base_model_name)
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
         
-        # Load base model with proper device handling
         if self.device == "cpu":
-            # For CPU, use float32 to avoid potential issues
             self.base_model = AutoModelForCausalLM.from_pretrained(
                 self.base_model_name,
                 torch_dtype=torch.float32,
                 device_map="auto"
             )
         else:
-            # For GPU/MPS, use float16 for efficiency
             self.base_model = AutoModelForCausalLM.from_pretrained(
                 self.base_model_name,
                 torch_dtype=torch.float16,
                 device_map="auto"
             )
         
-        # Load fine-tuned model
         self.finetuned_model = PeftModel.from_pretrained(
             self.base_model, 
             self.finetuned_model_path
@@ -81,7 +74,6 @@ class ModelEvaluator:
             max_length=512
         )
         
-        # Move inputs to the same device as the model
         inputs = {k: v.to(self.device) for k, v in inputs.items()}
         
         with torch.no_grad():
@@ -97,7 +89,6 @@ class ModelEvaluator:
                 )
             except RuntimeError as e:
                 if "MPS" in str(e) and "storage" in str(e):
-                    # Fallback to CPU if MPS has storage allocation issues
                     print("MPS storage issue detected, falling back to CPU...")
                     model = model.to("cpu")
                     inputs = {k: v.to("cpu") for k, v in inputs.items()}
@@ -129,7 +120,6 @@ class ModelEvaluator:
         reference_tokens = nltk.word_tokenize(reference.lower())
         candidate_tokens = nltk.word_tokenize(candidate.lower())
         
-        # Use smoothing function to handle cases with low n-gram overlap
         smoothie = SmoothingFunction().method4
         
         return sentence_bleu([reference_tokens], candidate_tokens, smoothing_function=smoothie)
@@ -162,11 +152,9 @@ class ModelEvaluator:
             print(f"Evaluating {i+1}/{len(test_prompts)}: {instruction[:50]}...")
             
             try:
-                # Generate responses
                 base_response = self.generate_response(self.base_model, instruction)
                 finetuned_response = self.generate_response(self.finetuned_model, instruction)
                 
-                # Calculate metrics if reference is available
                 metrics = {}
                 if reference:
                     metrics = {
@@ -190,7 +178,6 @@ class ModelEvaluator:
                 
             except Exception as e:
                 print(f"Error evaluating prompt {i+1}: {str(e)}")
-                # Add failed result to maintain order
                 result = {
                     'instruction': instruction,
                     'reference': reference,
@@ -238,7 +225,6 @@ def load_test_prompts() -> List[Dict]:
     return test_prompts
 
 def main():
-    # Configuration
     base_model_name = "microsoft/DialoGPT-small"
     finetuned_model_path = "training/model_adapters"
     
@@ -246,26 +232,21 @@ def main():
         print(f"Error: Fine-tuned model not found at {finetuned_model_path}")
         return
     
-    # Load test prompts
     test_prompts = load_test_prompts()
     
-    # Initialize evaluator
     try:
         evaluator = ModelEvaluator(base_model_name, finetuned_model_path)
     except Exception as e:
         print(f"Error initializing evaluator: {e}")
         return
     
-    # Run evaluation
     print(f"Starting evaluation of {len(test_prompts)} prompts...")
     results = evaluator.evaluate_prompts(test_prompts)
     
-    # Save results
     os.makedirs("evaluation", exist_ok=True)
     with open("evaluation/static_eval_results.json", "w") as f:
         json.dump(results, f, indent=2)
     
-    # Calculate summary statistics
     total_prompts = len(results)
     successful_results = [r for r in results if r['metrics'] and 'Error:' not in r['base_response']]
     prompts_with_metrics = len(successful_results)

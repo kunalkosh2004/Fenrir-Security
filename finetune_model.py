@@ -12,6 +12,8 @@ from datasets import Dataset
 import numpy as np
 from typing import Dict, List
 import os
+import warnings
+warnings.filterwarnings("ignore")
 
 class CLIDatasetProcessor:
     def __init__(self, tokenizer, max_length=512):
@@ -36,16 +38,14 @@ class CLIDatasetProcessor:
             )
         ]
         
-        # Tokenize with proper padding and truncation
         tokenized = self.tokenizer(
             prompts,
             truncation=True,
-            padding=True,  # Enable padding
+            padding=True, 
             max_length=self.max_length,
-            return_tensors=None,  # Keep as lists for now
+            return_tensors=None,
         )
         
-        # Set labels for language modeling (copy input_ids, not reference)
         tokenized["labels"] = [ids.copy() for ids in tokenized["input_ids"]]
         
         return tokenized
@@ -60,23 +60,18 @@ def find_target_modules(model):
     
     for name, module in model.named_modules():
         if isinstance(module, torch.nn.Linear):
-            # Store both full name and just the module name
             full_module_names.append(name)
             module_name = name.split('.')[-1]
             target_modules.add(module_name)
     
-    # Convert to list and filter out common non-attention modules
     target_modules = list(target_modules)
     
-    # Print available modules for debugging
     print(f"Available linear modules: {target_modules}")
-    print(f"Full module paths: {full_module_names[:10]}...")  # Show first 10
+    print(f"Full module paths: {full_module_names[:10]}...")
     
-    # Exclude output layers that we don't want to adapt
     exclude_modules = ['lm_head', 'head', 'classifier', 'score']
     filtered_modules = [m for m in target_modules if m not in exclude_modules]
     
-    # For DialoGPT, look for attention-related modules
     attention_patterns = ['c_attn', 'attn', 'self_attn', 'attention', 'c_proj', 'dense']
     attention_modules = [m for m in filtered_modules if any(pattern in m.lower() for pattern in attention_patterns)]
     
@@ -84,27 +79,23 @@ def find_target_modules(model):
         print(f"Found attention modules: {attention_modules}")
         return attention_modules
     
-    # If no attention modules, look for MLP/feed-forward modules
     mlp_patterns = ['c_fc', 'fc', 'mlp', 'dense', 'linear']
     mlp_modules = [m for m in filtered_modules if any(pattern in m.lower() for pattern in mlp_patterns)]
     
     if mlp_modules:
         print(f"Found MLP modules: {mlp_modules}")
-        return mlp_modules[:2]  # Limit to 2 modules
+        return mlp_modules[:2] 
     
-    # Last resort: return any filtered modules
     if filtered_modules:
         print(f"Using filtered modules: {filtered_modules[:2]}")
         return filtered_modules[:2]
     
-    # If all else fails, use a safe default
     print("Warning: No suitable modules found, using safe defaults")
     return ["c_attn"] if "c_attn" in target_modules else target_modules[:1]
 
 def load_dataset(file_path: str) -> Dataset:
     """Load Q&A dataset from JSON file"""
     if not os.path.exists(file_path):
-        # Create a sample dataset if it doesn't exist
         print(f"Dataset file {file_path} not found. Creating sample dataset...")
         sample_data = [
             {"question": "What is the ls command used for?", "answer": "The ls command is used to list directory contents in Unix-like operating systems."},
@@ -121,7 +112,6 @@ def load_dataset(file_path: str) -> Dataset:
     with open(file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
-    # Validate dataset format
     if not isinstance(data, list):
         raise ValueError("Dataset should be a list of dictionaries")
     
@@ -133,39 +123,32 @@ def load_dataset(file_path: str) -> Dataset:
     
     print(f"Loaded dataset with {len(data)} examples")
     
-    # Convert to HuggingFace Dataset
     dataset = Dataset.from_list(data)
     return dataset
 
 def setup_model_and_tokenizer(model_name: str):
     """Setup model and tokenizer for fine-tuning"""
-    # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     
-    # Add pad token if it doesn't exist
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
     
-    # Load model - CPU optimized settings
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
-        torch_dtype=torch.float32,  # Use float32 for CPU
-        device_map=None,  # Let PyTorch handle device placement
+        torch_dtype=torch.float32,
+        device_map=None,  
         trust_remote_code=True,
-        low_cpu_mem_usage=True  # Optimize for CPU memory usage
+        low_cpu_mem_usage=True
     )
     
     return model, tokenizer
 
 def setup_lora_config(model, model_name=""):
     """Setup LoRA configuration with automatically detected target modules"""
-    # For DialoGPT, manually specify known good target modules
     if "DialoGPT" in model_name or "dialogpt" in model_name.lower():
-        # DialoGPT uses c_attn for attention and c_proj for projection
         target_modules = ["c_attn", "c_proj"]
         print(f"Using DialoGPT-specific target modules: {target_modules}")
     else:
-        # Automatically find target modules for other models
         target_modules = find_target_modules(model)
     
     if not target_modules:
@@ -174,9 +157,9 @@ def setup_lora_config(model, model_name=""):
     print(f"Final target modules: {target_modules}")
     
     lora_config = LoraConfig(
-        r=16,  # rank
-        lora_alpha=32,  # scaling parameter
-        target_modules=target_modules,  # automatically detected or manually specified modules
+        r=16,
+        lora_alpha=32, 
+        target_modules=target_modules,
         lora_dropout=0.1,
         bias="none",
         task_type=TaskType.CAUSAL_LM,
@@ -185,16 +168,13 @@ def setup_lora_config(model, model_name=""):
 
 def fine_tune_model():
     """Main fine-tuning function"""
-    # Check device availability
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
     
     if device == "cpu":
         print("WARNING: Training on CPU will be significantly slower than GPU training.")
-        print("Consider using Google Colab, Kaggle, or a cloud service with GPU for faster training.")
     
-    # Configuration
-    model_name = "microsoft/DialoGPT-small"  # ~117M parameters, good for CLI tasks
+    model_name = "microsoft/DialoGPT-small"
     dataset_path = "./data/cli_qa_dataset.json"
     output_dir = "training/model_adapters"
     
@@ -206,10 +186,8 @@ def fine_tune_model():
     
     print(f"Dataset size: {len(dataset)}")
     
-    # Setup data processor
     processor = CLIDatasetProcessor(tokenizer)
     
-    # Tokenize dataset
     print("Tokenizing dataset...")
     tokenized_dataset = dataset.map(
         processor.tokenize_function,
@@ -217,57 +195,51 @@ def fine_tune_model():
         remove_columns=dataset.column_names
     )
     
-    # Debug: Check the first example
     print("Sample tokenized example:")
     print(f"Input IDs length: {len(tokenized_dataset[0]['input_ids'])}")
     print(f"Labels length: {len(tokenized_dataset[0]['labels'])}")
     print(f"Input IDs type: {type(tokenized_dataset[0]['input_ids'])}")
     print(f"Labels type: {type(tokenized_dataset[0]['labels'])}")
     
-    # Split dataset
     train_size = int(0.9 * len(tokenized_dataset))
     train_dataset = tokenized_dataset.select(range(train_size))
     eval_dataset = tokenized_dataset.select(range(train_size, len(tokenized_dataset)))
     
     print(f"Train size: {len(train_dataset)}, Eval size: {len(eval_dataset)}")
-    
-    # Setup LoRA with automatic target module detection
+
     lora_config = setup_lora_config(model, model_name)
     model = get_peft_model(model, lora_config)
     
     print("LoRA model setup complete")
     model.print_trainable_parameters()
     
-    # Training arguments - CPU optimized
     training_args = TrainingArguments(
         output_dir=output_dir,
         num_train_epochs=1,
-        per_device_train_batch_size=2,  # Reduced for CPU
-        per_device_eval_batch_size=2,   # Reduced for CPU
-        gradient_accumulation_steps=4,  # Increased to maintain effective batch size
-        warmup_steps=50,  # Reduced for smaller dataset
-        learning_rate=5e-5,  # Slightly lower learning rate for stability
-        fp16=False,  # Disabled for CPU training
-        logging_steps=5,  # More frequent logging for CPU
+        per_device_train_batch_size=2, 
+        per_device_eval_batch_size=2,  
+        gradient_accumulation_steps=4,  
+        warmup_steps=50, 
+        learning_rate=5e-5,  
+        fp16=False,  
+        logging_steps=5, 
         eval_strategy="steps",
-        eval_steps=25,  # More frequent evaluation
+        eval_steps=25,  
         save_steps=50,
         save_total_limit=2,
         load_best_model_at_end=True,
-        report_to=None,  # Disable wandb
-        dataloader_num_workers=0,  # Important for CPU training
-        remove_unused_columns=False,  # Can help with compatibility
+        report_to=None,  
+        dataloader_num_workers=0,  
+        remove_unused_columns=False,  
     )
     
-    # Data collator
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer,
-        mlm=False,  # Causal LM, not masked LM
-        pad_to_multiple_of=None,  # Don't pad to multiples
-        return_tensors="pt",  # Return PyTorch tensors
+        mlm=False, 
+        pad_to_multiple_of=None, 
+        return_tensors="pt",  
     )
     
-    # Trainer
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -286,7 +258,6 @@ def fine_tune_model():
     
     print(f"Model saved to {output_dir}")
     
-    # Save training metrics
     train_results = trainer.state.log_history
     with open(os.path.join(output_dir, "training_metrics.json"), "w") as f:
         json.dump(train_results, f, indent=2)
@@ -316,10 +287,8 @@ def inspect_model_architecture(model_name: str):
 if __name__ == "__main__":
     inspect_model_architecture("microsoft/DialoGPT-small")
     
-    # Create output directory
     os.makedirs("training/model_adapters", exist_ok=True)
     
-    # Run fine-tuning
     model, tokenizer = fine_tune_model()
     
     print("Fine-tuning complete!")

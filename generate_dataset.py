@@ -34,12 +34,12 @@ def generate_cli_qa_dataset(url) -> List[Dict]:
 
     return qa_pairs
 
-def save_dataset(qa_pairs: List[Dict], filename: str):
+def save_dataset(qa_pairs: List[Dict], file_path: str):
     """Save Q&A pairs to JSON file"""
-    os.makedirs("data",exist_ok=True)
-    with open(filename, 'w', encoding='utf-8') as f:
+    os.makedirs(os.path.dirname(file_path),exist_ok=True)
+    with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(qa_pairs, f, indent=2, ensure_ascii=False)
-    print(f"Dataset saved to {filename}")
+    print(f"Dataset saved to {file_path}")
 
 def main():
     url1 = "https://www.wecreateproblems.com/interview-questions/linux-commands-interview-questions"
