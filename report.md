@@ -10,7 +10,7 @@
   - Python official virtual environments documentation
   - Stack Overflow (for commonly asked command-line usage)
 - **Final Dataset Size**: 150+ curated Q&A pairs
-- **Format**: JSON, stored in `data/commandline_qa.json`
+- **Format**: JSON, stored in `data/cli_qa_dataset.json`
 
 ## ⚙️ Model and Hyperparameters
 
