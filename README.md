@@ -64,7 +64,7 @@ Generate ≥150 public Q&A pairs on command-line topics:
 python generate_dataset.py
 ```
 
-- Output: `data/commandline_qa.json`
+- Output: `data/cli_qa_dataset.json`
 - Topics covered: Git, Bash, tar/gzip, grep, Python venv, etc.
 
 ## 🎯 Fine-Tuning the Model
