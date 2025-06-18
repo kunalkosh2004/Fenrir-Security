@@ -14,7 +14,7 @@
 
 ## ⚙️ Model and Hyperparameters
 
-- **Base Model**: TinyLlama-1.1B (HF model repo)
+- **Base Model**: microsoft/DialoGPT-small
 - **Fine-Tuning Approach**: LoRA (Low-Rank Adaptation)
 - **LoRA Parameters**:
   - Rank (r): 8

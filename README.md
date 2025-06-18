@@ -75,8 +75,8 @@ We use **LoRA** for efficient parameter-efficient fine-tuning on free-tier GPUs 
 python finetune_model.py
 ```
 
-- Model used: Example `TinyLlama-1.1B` or `Phi-2`
-- Adapter output: `models/adapter/`
+- Model used: Example `microsoft/DialoGPT-small`
+- Adapter output: `training/model_adapter/`
 - Configuration:
   - Epochs: 1
   - LoRA parameters adjustable in `finetune_model.py`
